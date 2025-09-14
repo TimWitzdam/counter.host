@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Your Email Address</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+          "Segoe UI Symbol";
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      .email-container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background-color: #007bff;
+        color: #ffffff;
+        text-align: center;
+        padding: 40px 20px;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+      .content {
+        padding: 30px;
+        line-height: 1.6;
+        text-align: center;
+      }
+      .content h2 {
+        color: #007bff;
+        font-size: 20px;
+        margin-top: 0;
+      }
+      .verification-code {
+        font-size: 28px;
+        font-weight: bold;
+        color: #28a745;
+        margin: 20px 0;
+        padding: 10px 15px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        display: inline-block;
+      }
+      .button-container {
+        text-align: center;
+        margin: 25px 0;
+      }
+      .button {
+        display: inline-block;
+        background-color: #28a745;
+        color: #ffffff;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: bold;
+      }
+      .footer {
+        background-color: #f8f9fa;
+        color: #777;
+        text-align: center;
+        padding: 20px;
+        font-size: 12px;
+        border-top: 1px solid #e9ecef;
+      }
+      .footer p {
+        margin: 0;
+      }
+      .footer a {
+        color: #777;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">
+        <h1>Please Verify Your Email Address</h1>
+      </div>
+      <div class="content">
+        <h2>Hi {{name}},</h2>
+        <p>
+          Thank you for signing up for <b>counter.host</b>! To complete your
+          registration and activate your account, please verify your email
+          address by using the code below.
+        </p>
+
+        <div class="verification-code">{{token}}</div>
+
+        <p>
+          You can enter this code on our verification page:
+          <a
+            href="{{verify_page}}"
+            style="color: #007bff; text-decoration: underline"
+            >{{verify_page}}</a
+          >
+        </p>
+
+        <p>
+          If you did not create an account with counter.host, please ignore this
+          email.
+        </p>
+
+        <p>If you have any questions, feel free to reply to this email.</p>
+
+        <p>Best regards,<br />The counter.host Team</p>
+      </div>
+      <div class="footer">
+        <p>&copy; {{year}} counter.host. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
