@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #f2f2f2;
+  --font-sans: var(--font-inter);
+}
+
+@theme {
+  --text-4xl: 2.5rem;
+  --text-4xl--line-height: 2.8rem;
+  --text-4xl--letter-spacing: -0.05rem;
+
+  --text-3xl: 2rem;
+  --text-3xl--line-height: 2.4rem;
+  --text-3xl--letter-spacing: -0.027rem;
+
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.725rem;
+  --text-2xl--letter-spacing: -0.0075rem;
+
+  --text-base: 1rem;
+  --text-base--line-height: 1.3rem;
+  --text-base--letter-spacing: 0.015rem;
+}
+
+body {
+  background: var(--color-background);
+  font-family: Inter, Helvetica, sans-serif;
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+  letter-spacing: var(--text-base--letter-spacing);
+}
