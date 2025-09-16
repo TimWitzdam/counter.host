@@ -15,6 +15,13 @@ CREATE TABLE "email_verification" (
     verified_at TIMESTAMP
 );
 
+CREATE TABLE "session" (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES "user"(id),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_used TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE "counter" (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     active BOOLEAN NOT NULL DEFAULT true,

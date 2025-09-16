@@ -34,4 +34,15 @@ export class EmailService {
 
     await EmailService.sendMail(to, "Verify your E-Mail", html);
   }
+
+  static async sendConfirmRegister(to: string, name: string) {
+    let html = fs
+      .readFileSync("app/lib/emails/confirmRegister.html")
+      .toString();
+
+    html = html.replaceAll("{{name}}", name);
+    html = html.replaceAll("{{login_page}}", "https://counter.host/login");
+
+    await EmailService.sendMail(to, "Welcome to counter.host", html);
+  }
 }

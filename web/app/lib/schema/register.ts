@@ -11,7 +11,7 @@ export default z.object({
     .toLowerCase(),
   password: z
     .string()
-    .min(16, { message: "Be at least 16 characters long" })
-    .max(128, { message: "Be at most 128 characters long" })
+    .min(16, { message: "Password must be at least 16 characters long." })
+    .max(128, { message: "Password must be at most 128 characters long." })
     .trim(),
 });
