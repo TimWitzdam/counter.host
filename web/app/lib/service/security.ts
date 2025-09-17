@@ -67,6 +67,14 @@ export class SecurityService {
     });
   }
 
+  static async verifyHash(hash: string, validData: string) {
+    if (await argon2.verify(hash, validData)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   static async generateVerifyEmailToken() {
     const length = 6;
     const charset = "0123456789";

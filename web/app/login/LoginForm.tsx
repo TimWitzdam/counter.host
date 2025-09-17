@@ -5,10 +5,12 @@ import BaseInput from "../components/BaseInput";
 import PrimaryButton from "../components/PrimaryButton";
 import InformationIcon from "@/public/icons/Information.svg";
 import { useRouter } from "next/navigation";
+import RoundedCheckmark from "@/public/icons/RoundedCheckmark.svg";
 
 export default function RegisterForm() {
   const [errors, setErrors] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   const router = useRouter();
 
@@ -19,19 +21,24 @@ export default function RegisterForm() {
 
     const form = new FormData(e.currentTarget);
     try {
-      const res = await fetch("/api/user/register", {
+      const res = await fetch("/api/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: form.get("name"),
           email: form.get("email"),
           password: form.get("password"),
         }),
       });
 
       if (res.ok) {
-        router.refresh();
+        setSuccess(true);
+        setTimeout(() => {
+          router.replace("/app");
+        }, 2000);
       } else {
+        if (res.status === 403) {
+          router.refresh();
+        }
         const json = await res.json().catch(() => null);
         if (json && json.errors) {
           const messages: string[] = [];
@@ -40,6 +47,8 @@ export default function RegisterForm() {
             messages.push(...arr);
           }
           setErrors(messages);
+        } else if (json && json.error) {
+          setErrors([json.error]);
         } else {
           setErrors(["Unexpected error occurred. Please contact the support."]);
         }
@@ -57,12 +66,6 @@ export default function RegisterForm() {
       className="w-full flex flex-col gap-4 items-center justify-center mt-6"
     >
       <BaseInput
-        id="name"
-        name="name"
-        placeholder="Name"
-        autoComplete="username"
-      />
-      <BaseInput
         id="email"
         name="email"
         placeholder="Email"
@@ -72,16 +75,15 @@ export default function RegisterForm() {
       <BaseInput
         id="password"
         name="password"
-        placeholder="Password (min. 16 characters)"
+        placeholder="Password"
         type="password"
-        autoComplete="new-password"
+        autoComplete="password"
       />
       <p className="text-xs text-gray self-start">
-        By continuing you agree to our{" "}
-        <a href="/tos" target="_blank" className="text-blue-500">
-          terms of service
+        Forgot your password?{" "}
+        <a href="/reset-password" target="_blank" className="text-blue-500">
+          Reset it here.
         </a>
-        .
       </p>
       {errors &&
         errors.map((err, i) => (
@@ -95,7 +97,14 @@ export default function RegisterForm() {
         disabled={loading}
         loading={loading}
       >
-        Continue
+        {success ? (
+          <div className="flex items-center gap-2">
+            <RoundedCheckmark />
+            <p>Success. Redirecting to app...</p>
+          </div>
+        ) : (
+          "Continue"
+        )}
       </PrimaryButton>
     </form>
   );

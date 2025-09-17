@@ -62,26 +62,34 @@ export class UserService {
       WHERE id = $1`,
         [sessionCookie]
       );
+    } catch (e) {
+      client.release();
+      return null;
+    }
 
+    if (sessionResult.rowCount === 0) {
+      client.release();
+      return null;
+    }
+
+    const userId = sessionResult.rows[0].user_id;
+
+    try {
       tokenResult = await client.query(
         `SELECT user_id 
         FROM "email_verification"
         WHERE token = $1
-        AND verified_at IS NULL`,
-        [token]
+        AND verified_at IS NULL
+        AND user_id = $2`,
+        [token, userId]
       );
     } catch (e) {
+      client.release();
       return null;
     }
 
-    if (sessionResult.rowCount === 0 || tokenResult.rowCount === 0) {
-      return null;
-    }
-
-    const sessionUser = sessionResult.rows[0].user_id;
-    const tokenUser = tokenResult.rows[0].user_id;
-
-    if (sessionUser !== tokenUser) {
+    if (tokenResult.rowCount === 0) {
+      client.release();
       return null;
     }
 
@@ -95,7 +103,7 @@ export class UserService {
     await client.query("COMMIT");
     client.release();
 
-    return tokenUser;
+    return userId;
   }
 
   static async getUser(id: string) {
@@ -123,5 +131,116 @@ export class UserService {
       email: decryptedEmail,
       createdAt: row.created_at,
     };
+  }
+
+  static async authenticate(email: string, password: string) {
+    const client = await getClient();
+    await client.query("BEGIN");
+
+    const hashedEmail = SecurityService.deterministicHash(email);
+
+    let userResult;
+    try {
+      userResult = await client.query(
+        `SELECT u.id, u.password, ev.verified_at
+        FROM "user" AS u
+        LEFT JOIN email_verification AS ev
+          ON u.id = ev.user_id
+        WHERE u.hashed_email = $1;`,
+        [hashedEmail]
+      );
+    } catch (e) {
+      client.release();
+      return;
+    }
+
+    if (userResult.rowCount === 0) {
+      client.release();
+      return;
+    }
+
+    const user = userResult.rows[0];
+
+    try {
+      if (await SecurityService.verifyHash(user.password, password)) {
+        const isVerified = user.verified_at ? true : false;
+        return [user.id, isVerified];
+      } else {
+        return;
+      }
+    } catch (err) {
+      return;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async newSession(userId: string) {
+    const sessionCookie = crypto.randomUUID();
+
+    const client = await getClient();
+    await client.query("BEGIN");
+
+    try {
+      await client.query(
+        `INSERT INTO "session"(id, user_id) 
+       VALUES ($1, $2);`,
+        [sessionCookie, userId]
+      );
+      await client.query("COMMIT");
+
+      return sessionCookie;
+    } catch (e) {
+      await client.query("ROLLBACK");
+      return;
+    } finally {
+      client.release();
+    }
+  }
+
+  static async validateSession(sessionCookie: string) {
+    const client = await getClient();
+    await client.query("BEGIN");
+
+    let verifiedResult;
+    try {
+      verifiedResult = await client.query(
+        `SELECT
+        ev.verified_at
+        FROM session AS s
+        LEFT JOIN "user" AS u ON u.id = s.user_id
+        LEFT JOIN email_verification AS ev ON u.id = ev.user_id
+        WHERE s.id = $1;`,
+        [sessionCookie]
+      );
+    } catch (e) {
+      client.release();
+      return;
+    }
+
+    if (verifiedResult.rowCount === 0) {
+      client.release();
+      return;
+    }
+
+    try {
+      await client.query(
+        `UPDATE "session"
+        SET last_used = NOW()
+        WHERE id = $1`,
+        [sessionCookie]
+      );
+      await client.query("COMMIT");
+    } catch (e) {
+      await client.query("ROLLBACK");
+      return;
+    } finally {
+      client.release();
+    }
+
+    const verifiedAt = verifiedResult.rows[0];
+
+    const isVerified = verifiedAt.verified_at ? true : false;
+    return isVerified;
   }
 }
